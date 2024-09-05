@@ -5,7 +5,7 @@ const fs = require('fs');
 const multer = require('multer');
 
 const app = express();
-const port = 3000;
+const port = 3002;
 
 // Set up EJS as the template engine
 app.set('view engine', 'ejs');
