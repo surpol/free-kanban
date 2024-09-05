@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storyboard</title>
+    <link href="/css/output.css" rel="stylesheet">
+</head>
+<body class="bg-gray-300">
+    <div class="container mx-auto p-4">
+        <div class="flex flex-row space-x-2 mb-6">
+            <!-- Add New Story Button -->
+            <button id="add-story-button" class="bg-blue-500 text-white px-4 py-2">Add story</button>
+            <a href="/export-db" class="bg-gray-500 text-white px-4 py-2">Export database</a>
+            <input type="file" id="db-file-upload" class="hidden" />
+            <label for="db-file-upload" class="bg-gray-500 text-white px-4 py-2 cursor-pointer">Import database</label>
+        </div>
+        
+        <!-- Flexbox layout for the story columns -->
+        <div class="flex gap-4">
+            <!-- Not Started Column -->
+            <div class="w-1/3">
+                <h2 class="text-2xl font-semibold mb-4">New</h2>
+                <div id="not-started" class="p-4 bg-gray-200 min-h-screen">
+                    <% stories.filter(story => story.status === 1).forEach(story => { %>
+                        <div class="story-card mb-4 p-4 bg-white shadow-md cursor-pointer" data-id="<%= story.id %>" data-title="<%= story.title %>" data-description="<%= story.description %>" data-status="1">
+                            <h3 class="text-xl font-semibold"><%= story.title %></h3>
+                            <p><%= story.description %></p>
+                            <button class="delete-button bg-red-500 text-white px-2 py-1 mt-1">delete</button>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+
+            <!-- In Progress and Completed Side-by-Side Flexbox -->
+            <div class="w-2/3 flex gap-4">
+                <!-- In Progress Column -->
+                <div class="w-1/2">
+                    <h2 class="text-2xl font-semibold mb-4">In Progress</h2>
+                    <div id="in-progress" class="p-4 bg-gray-200 min-h-screen">
+                        <% stories.filter(story => story.status === 2).forEach(story => { %>
+                            <div class="story-card mb-4 p-4 bg-white bg-white shadow-md cursor-pointer" data-id="<%= story.id %>" data-title="<%= story.title %>" data-description="<%= story.description %>" data-status="2">
+                                <h3 class="text-xl font-semibold"><%= story.title %></h3>
+                                <p><%= story.description %></p>
+                                <button class="delete-button bg-red-500 text-white px-2 py-1 mt-1">delete</button>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <!-- Completed Column -->
+                <div class="w-1/2">
+                    <h2 class="text-2xl font-semibold mb-4">Complete</h2>
+                    <div id="completed" class="p-4 bg-gray-200 min-h-screen">
+                        <% stories.filter(story => story.status === 3).forEach(story => { %>
+                            <div class="story-card mb-4 p-4 bg-white shadow-md cursor-pointer" data-id="<%= story.id %>" data-title="<%= story.title %>" data-description="<%= story.description %>" data-status="3">
+                                <h3 class="text-xl font-semibold"><%= story.title %></h3>
+                                <p><%= story.description %></p>
+                                <button class="delete-button bg-red-500 text-white px-2 py-1 mt-1">delete</button>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Editing Existing Story (Hidden by default) -->
+    <div id="story-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white p-6 w-1/3">
+            <h2 class="text-2xl font-semibold mb-4">Edit Story</h2>
+            <form id="edit-story-form">
+                <input type="hidden" id="story-id" name="id">
+                <div class="mb-4">
+                    <label class="block text-lg font-semibold">Title</label>
+                    <input type="text" id="story-title" name="title" class="w-full p-2 border border-gray-300">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-lg font-semibold">Description</label>
+                    <textarea id="story-description" name="description" class="w-full p-2 border border-gray-300"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-lg font-semibold">Status</label>
+                    <select id="story-status" name="status" class="w-full p-2 border border-gray-300">
+                        <option value="1">Not Started</option>
+                        <option value="2">In Progress</option>
+                        <option value="3">Completed</option>
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancel-button" class="mr-4 bg-gray-300 px-4 py-2">Cancel</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Adding New Story (Hidden by default) -->
+    <div id="new-story-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white p-6 w-1/3">
+            <h2 class="text-2xl font-semibold mb-4">Add New Story</h2>
+            <form id="add-story-form">
+                <div class="mb-4">
+                    <label class="block text-lg font-semibold">Title</label>
+                    <input type="text" id="new-story-title" name="title" class="w-full p-2 border border-gray-300" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-lg font-semibold">Description</label>
+                    <textarea id="new-story-description" name="description" class="w-full p-2 border border-gray-300" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-lg font-semibold">Status</label>
+                    <select id="new-story-status" name="status" class="w-full p-2 border border-gray-300">
+                        <option value="1">Not Started</option>
+                        <option value="2">In Progress</option>
+                        <option value="3">Completed</option>
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancel-new-story-button" class="mr-4 bg-gray-300 px-4 py-2 hover:bg-gray-100">Cancel</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 hover:bg-blue-200">Add Story</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Show modal and populate fields when a story card is clicked
+        document.querySelectorAll('.story-card').forEach(card => {
+            card.addEventListener('click', function () {
+                const storyId = this.getAttribute('data-id');
+                const storyTitle = this.getAttribute('data-title');
+                const storyDescription = this.getAttribute('data-description');
+                const storyStatus = this.getAttribute('data-status');
+
+                // Fill the modal form with story data
+                document.getElementById('story-id').value = storyId;
+                document.getElementById('story-title').value = storyTitle;
+                document.getElementById('story-description').value = storyDescription;
+                document.getElementById('story-status').value = storyStatus;
+
+                // Show the modal
+                document.getElementById('story-modal').classList.remove('hidden');
+            });
+        });
+
+        // Handle modal form submission for editing a story
+        document.getElementById('edit-story-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const storyId = document.getElementById('story-id').value;
+            const formData = new URLSearchParams(new FormData(this)).toString();
+
+            // Send the updated story details via PATCH request
+            fetch(`/story/${storyId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Status updated successfully') {
+                    // Hide the modal and reload the page to show the updated story
+                    document.getElementById('story-modal').classList.add('hidden');
+                    window.location.reload();
+                }
+            })
+            .catch(err => console.error(err));
+        });
+
+        // Handle cancel button click for editing a story
+        document.getElementById('cancel-button').addEventListener('click', function () {
+            // Hide the modal
+            document.getElementById('story-modal').classList.add('hidden');
+        });
+        // Show "Add New Story" modal
+        document.getElementById('add-story-button').addEventListener('click', function () {
+            // Clear the form fields
+            document.getElementById('new-story-title').value = '';
+            document.getElementById('new-story-description').value = '';
+            document.getElementById('new-story-status').value = '1';
+
+            // Show the modal
+            document.getElementById('new-story-modal').classList.remove('hidden');
+        });
+
+        // Handle cancel button for adding a new story
+        document.getElementById('cancel-new-story-button').addEventListener('click', function () {
+            // Hide the modal
+            document.getElementById('new-story-modal').classList.add('hidden');
+        });
+
+        // Handle form submission for adding a new story
+    document.getElementById('add-story-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new URLSearchParams(new FormData(this)).toString();
+
+        // Send the new story data via POST request
+        fetch('/story', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+        })
+        .then(response => {
+            // Check if response is an HTML page instead of JSON
+            const contentType = response.headers.get("content-type");
+            if (!response.ok || !contentType || !contentType.includes("application/json")) {
+                throw new Error('Server returned an invalid response.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.message === 'Story added successfully') {
+                // Hide the modal and reload the page to show the new story
+                document.getElementById('new-story-modal').classList.add('hidden');
+                window.location.reload(); // Reload the page to reflect the new story
+            }
+        })
+        .catch(err => {
+            console.error('There was a problem with the fetch operation:', err);
+            alert('An error occurred while adding the story. Please try again.');
+        });
+    });
+
+
+
+    // Add event listener to delete buttons
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.stopPropagation(); // Prevent triggering the story card click event
+
+            const storyCard = this.closest('.story-card');
+            const storyId = storyCard.getAttribute('data-id');
+
+            if (confirm('Are you sure you want to delete this story?')) {
+                // Send DELETE request
+                fetch(`/story/${storyId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json()) // Convert response to JSON
+                .then(data => {
+                    if (data.message === 'Story deleted successfully') {
+                        console.log('Story deleted, reloading page...');
+                        window.location.reload();
+                    } else {
+                        console.error('Failed to delete story');
+                    }
+                })
+                .catch(err => console.error('Error:', err));
+            }
+        });
+    });
+
+
+    document.getElementById('db-file-upload').addEventListener('change', function() {
+        const file = this.files[0]; // Get the selected file
+        if (!file) {
+            alert('No file selected');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('database', file); // Append the file to the form data
+
+        // Send the form data to the server
+        fetch('/upload-db', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text()) // Expect a text response from the server
+        .then(result => {
+            alert(result); // Show the result (e.g., "Database uploaded successfully")
+            window.location.reload(); // Reload the page to reflect the new DB
+        })
+        .catch(err => {
+            console.error('Error uploading the database:', err);
+            alert('Failed to upload the database. Please try again.');
+        });
+    });
+
+    </script>
+</body>
+</html>
+
