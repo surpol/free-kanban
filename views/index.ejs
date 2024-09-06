@@ -179,7 +179,7 @@
 
         // Handle click on a story to open it in a modal for updating
         document.addEventListener('click', function (e) {
-            if (e.target.closest('.story-card')) {
+            if (e.target.closest('.story-card') && !e.target.closest('.delete-button')) {
                 const storyCard = e.target.closest('.story-card');
                 const storyId = storyCard.getAttribute('data-id');
                 const title = storyCard.getAttribute('data-title');
@@ -223,6 +223,7 @@
         // Delete story functionality
         document.addEventListener('click', function (e) {
             if (e.target.closest('.delete-button')) {
+                e.stopPropagation(); // Prevent triggering the story card click event
                 const storyId = e.target.getAttribute('data-id');
 
                 db.run('DELETE FROM stories WHERE id = ?', [storyId]);
